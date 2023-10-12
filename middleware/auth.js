@@ -1,9 +1,9 @@
 const { verifytoken } = require("../helper/jwt_token");
+const { checkPermission } = require("../helper/auth_roles");
 
 // response
 const response = require("../helper/response");
 // response
-
 
 module.exports = {
 
@@ -13,21 +13,29 @@ module.exports = {
         let token = authorization.replace("Basic ", "");
         token = token.replace("Bearer ", "");
         verifytoken(token, async(err, payload) => {
-            // await m_log_trace.createLogTrace({
-            //     name:"log token",
-            //     description:`${token} ? ${err}`
-            // });
-            // console.log(payload);
             if (err) {
                 return response.unauthorized({
                     isTokenExpired: true
                 }, res, "Your token is expired");
             } else {
                 req.decoded = payload;
-                // console.log(payload.id," ID USER");
                 next();
             }
         });
     },
+
+    authrole:(permission_name="")=>{
+        return async(req, res, next) => {
+            let id_users=req.decoded.id;
+            let permission=await checkPermission({id_users,permission_name});
+            if(permission){
+                return next();
+            }else{
+                return response.unauthorized({
+                    isTokenExpired:false
+                },res,"Roles anda tidak diizinkan akses api ini");
+            }
+        }
+    }
 
 };

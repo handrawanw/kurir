@@ -3,7 +3,7 @@ const query_helper=require("../../helper/query_helper");
 
 module.exports={
 
-    listUsers:async({username,email,page,limit})=>{
+    listUsers:async({page,limit})=>{
         let offset=query_helper.parsePageToOffset({page,limit});
 
         let select=[
@@ -15,14 +15,8 @@ module.exports={
 
         query.leftJoin("users_roles as ur","ur.id_users","users.id");
         query.leftJoin("roles","roles.id","ur.id_roles");
-        
-        if(username){
-            query.whereILike('users.username',`%${username}%`);
-        }
 
-        if(email){
-            query.whereILike('users.email',`%${email}%`);
-        }
+        query.where(knex_pg.raw("lower(roles.name)"),"=","kurir");
         
         query.groupBy("users.id");
 
@@ -30,9 +24,7 @@ module.exports={
         
         if (limit) {
             let queryCountData = knex_pg.count("* as count").from(query.as("counts"));
-            // console.log(queryCountData.toQuery());
             count = (await queryCountData)[0].count;
-            // console.log(query.toQuery());
             query.limit(limit);
         }
         

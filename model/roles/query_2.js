@@ -21,7 +21,7 @@ module.exports={
         let count = 0;
 
         if (limit) {
-            let queryCountData = query.count("* as count");
+            let queryCountData = knex_pg.count("* as count").from(query.as("counts"));
             // console.log(queryCountData.toQuery());
             count = (await queryCountData)[0].count;
             query.limit(limit);

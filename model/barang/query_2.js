@@ -3,19 +3,24 @@ let query_helper=require("../../helper/query_helper");
 
 module.exports={
 
-    listPermission:async({name, description, page, limit})=>{
+    listBarang:async({name, description, page, limit})=>{
         let offset=query_helper.parsePageToOffset({page,limit})
 
-        let select=["id","name","description","created_at","updated_at"];
+        let select=[
+            "barang.id","barang.name","barang.pictures","barang.alamat","barang.description","barang.penerima","barang.phone","barang.created_at","barang.updated_at",
+            "kb.name as kategori"
+        ];
 
-        let query=knex_pg.select(select).from("permission");
+        let query=knex_pg.select(select).from("barang");
+
+        query.innerJoin("kategori_barang as kb","kb.id","barang.id_kategori_barang");
         
         if(name){
-            query.whereILike('permission.name',`%${name}%`);
+            query.whereILike('barang.name',`%${name}%`);
         }
 
         if(description){
-            query.whereILike('permission.description',`%${description}%`);
+            query.whereILike('barang.description',`%${description}%`);
         }
 
         let count = 0;
